@@ -9,6 +9,7 @@
 
 enum primordial_spectrum_type {
                                reconstruction_Pk,
+                               linear_Pk,
                                analytic_Pk,
                                two_scales,
                                inflation_V,
@@ -105,6 +106,8 @@ struct primordial {
   double k_8;
   double k_9;
   double k_10;
+  double k_11;
+  double k_12; 
   double Pk_1;
   double Pk_2;
   double Pk_3;
@@ -115,6 +118,8 @@ struct primordial {
   double Pk_8;
   double Pk_9;
   double Pk_10;
+  double Pk_11;
+  double Pk_12;
   double * k_i;
   double * Pk_i;
 //  double k_i[100];
