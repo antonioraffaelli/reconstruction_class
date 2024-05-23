@@ -4069,6 +4069,9 @@ int input_read_parameters_primordial(struct file_content * pfc,
     if (strcmp(string1,"reconstruction_Pk") == 0){
       ppm->primordial_spec_type = reconstruction_Pk;
     }    
+    else if (strcmp(string1,"linear_Pk") == 0){
+      ppm->primordial_spec_type = linear_Pk;
+    }    
     else if (strcmp(string1,"analytic_Pk") == 0){
       ppm->primordial_spec_type = analytic_Pk;
     }
@@ -4089,7 +4092,7 @@ int input_read_parameters_primordial(struct file_content * pfc,
     }
     else{
       class_stop(errmsg,
-                 "You specified 'P_k_ini_type' as '%s'. It has to be one of {'reconstruction_Pk', 'analytic_Pk','inflation_V','inflation_V_end','two_scales','external_Pk'}.",string1);
+                 "You specified 'P_k_ini_type' as '%s'. It has to be one of {'linear_Pk','reconstruction_Pk', 'analytic_Pk','inflation_V','inflation_V_end','two_scales','external_Pk'}.",string1);
     }
   }
 
@@ -4099,6 +4102,14 @@ int input_read_parameters_primordial(struct file_content * pfc,
 
   /** For type 'reconstruction_Pk'*/
 
+  if (ppm->primordial_spec_type == linear_Pk) {
+    /* Read */
+    class_call(parser_read_double(pfc,"A_s",&param1,&flag1,errmsg),
+              errmsg,
+              errmsg);
+    class_read_double("n_s",ppm->n_s);
+
+  }
   if (ppm->primordial_spec_type == reconstruction_Pk) {
 
     class_call(parser_read_int(pfc,"N_knots",&paramN,&flagN,errmsg),
@@ -4225,6 +4236,21 @@ int input_read_parameters_primordial(struct file_content * pfc,
     if (paramP9 != 0){
       ppm->Pk_9 =paramP9;   
     }
+    
+    class_call(parser_read_double(pfc,"k_10",&param10,&flag10,errmsg),
+                 errmsg,
+                 errmsg);
+    if (param10 != 0){
+      ppm->k_10 =param10;  
+    }
+    
+    class_call(parser_read_double(pfc,"Pk_10",&paramP10,&flagP10,errmsg),
+                 errmsg,
+                 errmsg);
+    if (paramP10 != 0){
+      ppm->Pk_10 =paramP10;   
+    }
+
   }
   /** 1.b) For type 'analytic_Pk' */
   if (ppm->primordial_spec_type == analytic_Pk) {
