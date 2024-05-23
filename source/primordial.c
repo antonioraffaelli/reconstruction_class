@@ -37,52 +37,58 @@ int primordial_reconstruction_spectrum(
 
   if (pow(10,ppm->k_1) != 0) {
     ks[0]=pow(10,ppm->k_1);
-    Pks[0]=ppm->Pk_1;
+    Pks[0]=pow(10,-10)*exp(ppm->Pk_1);
   }
 
   if (pow(10,ppm->k_2) != 0 && ppm->N_knots>1) {
     ks[1]=pow(10,ppm->k_2);
-    Pks[1]=ppm->Pk_2;
+    Pks[1]=pow(10,-10)*exp(ppm->Pk_2);
   }
 
   if (pow(10,ppm->k_3) != 0 && ppm->N_knots>2) {
     ks[2]=pow(10,ppm->k_3);
-    Pks[2]=ppm->Pk_3;
+    Pks[2]=pow(10,-10)*exp(ppm->Pk_3);
   }
 
   if (pow(10,ppm->k_4) != 0 && ppm->N_knots>3) {
     ks[3]=pow(10,ppm->k_4);
-    Pks[3]=ppm->Pk_4;
+    Pks[3]=pow(10,-10)*exp(ppm->Pk_4);
   }
 
   if (pow(10,ppm->k_5) != 0 && ppm->N_knots>4) {
     ks[4]=pow(10,ppm->k_5);
-    Pks[4]=ppm->Pk_5;
+    Pks[4]=pow(10,-10)*exp(ppm->Pk_5);
   }
 
   if (pow(10,ppm->k_6) != 0 && ppm->N_knots>5) {
     ks[5]=pow(10,ppm->k_6);
-    Pks[5]=ppm->Pk_6;
+    Pks[5]=pow(10,-10)*exp(ppm->Pk_6);
   }
 
   if (pow(10,ppm->k_7) != 0 && ppm->N_knots>6) {
     ks[6]=pow(10,ppm->k_7);
-    Pks[6]=ppm->Pk_7;
+    Pks[6]=pow(10,-10)*exp(ppm->Pk_7);
   }
 
   if (pow(10,ppm->k_8) != 0 && ppm->N_knots>7) {
     ks[7]=pow(10,ppm->k_8);
-    Pks[7]=ppm->Pk_8;
+    Pks[7]=pow(10,-10)*exp(ppm->Pk_8);
   }
 
   if (pow(10,ppm->k_9) != 0 && ppm->N_knots>8) {
     ks[8]=pow(10,ppm->k_9);
-    Pks[8]=ppm->Pk_9;
+    Pks[8]=pow(10,-10)*exp(ppm->Pk_9);
   }
 
-//qsort(ks, sizeof(ks)/sizeof(*ks), sizeof(*ks),comp);
+  if (pow(10,ppm->k_10) != 0 && ppm->N_knots>9) {
+    ks[9]=pow(10,ppm->k_10);
+    Pks[9]=pow(10,-10)*exp(ppm->Pk_10);
+  }
 
-//check ascending order of ks
+  if (pow(10,ppm->k_11) != 0 && ppm->N_knots>10) {
+    ks[10]=pow(10,ppm->k_11);
+    Pks[10]=pow(10,-10)*exp(ppm->Pk_11);
+  }
 
 
   if (ks[ppm->N_knots-1]<k_max){
@@ -93,46 +99,49 @@ int primordial_reconstruction_spectrum(
     ks[0]=k_min;
   }
 
+  int index=0;
 
-  ks[0]=k_min;
-  ks[ppm->N_knots-1]=k_max;
+  for(int i=1;i<ppm->N_knots;i++){
+    if (ks[i-1]<=k && k<=ks[i]) {
+      index=i;
+    }
+  }
 
+
+  int i;
   if (ppm->N_knots==1) {
     *pk=ppm->Pk_1;
   }
 
   else if (ppm->N_knots==2) {
-    *pk=(log(k)-log(k_min)) * (Pks[1]-Pks[0])/(log(k_max)-log(k_min)) + Pks[0];
+    *pk=(log(k)-log(ks[0])) * (Pks[1]-Pks[0])/(log(ks[1])-log(ks[0])) + Pks[0];
   }
   
   else if (ppm->N_knots>2) {
-    for (int i=1;i<ppm->N_knots;i++) {
-      if (ks[i-1]<=k && k<=ks[i]){
-        *pk=(log(k)-log(ks[i-1])) * (Pks[i]-Pks[i-1])/(log(ks[i])-log(ks[i-1])) + Pks[i-1];
-      }
+    if (index!=0){
+      *pk=(log(k)-log(ks[index-1])) * (Pks[index]-Pks[index-1])/(log(ks[index])-log(ks[index-1])) + Pks[index-1];
+    }
+    else {
+      *pk=(log(k)-log(ks[1])) * (Pks[ppm->N_knots-2]-Pks[1])/(log(ks[ppm->N_knots-2])-log(ks[1])) + Pks[1];
     }
   }
+    
+  
 
-  for (int l=1;l<ppm->N_knots;l++){
-    if (ks[l]<ks[l-1]){
-      *pk=0;
-    }
-  }
+}
 
 
-/*
-  if (ppm->N_knots>1) {
-    for (int i=1;i<ppm->N_knots;i++) {
-      if (ppm->k_i[i-1]<=k && k<=ppm->k_i[i])
-        *pk=(log(k)-log(ppm->k_i[i-1])) * (ppm->Pk_i[i]-ppm->Pk_i[i-1])/(log(ppm->k_i[i])-log(ppm->k_i[i-1])) + ppm->Pk_i[i-1];
-        
-    }
-  }
-
-  else {
-    *pk=0.5;
-  }
-*/
+int primordial_linear_spectrum(
+                                 struct primordial * ppm,
+                                 int index_md,
+                                 int index_ic1_ic2,
+                                 double k_min,
+                                 double k_max,
+                                 double k,
+                                 double * pk
+                                 ) {
+  /*qui ci va la nostra formula analitica*/
+  *pk=exp(-k)+ppm->A_s-exp(-ppm->k_pivot);
 }
 
 
@@ -213,6 +222,17 @@ int primordial_spectrum_at_k(
 
           if (ppm->primordial_spec_type == reconstruction_Pk) {
             class_call(primordial_reconstruction_spectrum(ppm,
+                                                  index_md,
+                                                  index_ic1_ic2,
+                                                  exp(ppm->lnk[0]),
+                                                  exp(ppm->lnk[ppm->lnk_size-1]),
+                                                  exp(lnk),
+                                                  &(output[index_ic1_ic2])),
+                      ppm->error_message,
+                      ppm->error_message);
+          }
+          else if (ppm->primordial_spec_type == linear_Pk) {
+            class_call(primordial_linear_spectrum(ppm,
                                                   index_md,
                                                   index_ic1_ic2,
                                                   exp(ppm->lnk[0]),
@@ -542,6 +562,104 @@ int primordial_init(
                            ppm->error_message);
 
                 class_call(primordial_reconstruction_spectrum(ppm,
+                                                        index_md,
+                                                        index_symmetric_matrix(index_ic2,index_ic2,ppm->ic_size[index_md]),
+                                                        exp(ppm->lnk[0]),
+                                                        exp(ppm->lnk[ppm->lnk_size-1]),
+                                                        k,
+                                                        &pk2),
+                           ppm->error_message,
+                           ppm->error_message);
+
+                /* either return an error if correlation is too large... */
+                /*
+                  cos_delta_k = pk/sqrt(pk1*pk2);
+                  class_test_except((cos_delta_k < -1.) || (cos_delta_k > 1.),
+                  ppm->error_message,
+                  primordial_free(ppm),
+                  "correlation angle between IC's takes unphysical values");
+
+                  ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = cos_delta_k;
+                */
+
+                /* ... or enforce definite positive correlation matrix */
+
+                if (pk > sqrt(pk1*pk2))
+                  ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = 1.;
+                else if (pk < -sqrt(pk1*pk2))
+                  ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = -1.;
+                else
+                  ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = pk/sqrt(pk1*pk2);
+
+
+              }
+            }
+            else {
+
+              /* non-diagonal coefficients when ic's are uncorrelated */
+
+              ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = 0.;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  else if (ppm->primordial_spec_type == linear_Pk) {
+
+    if (ppm->primordial_verbose > 0)
+      printf(" (analytic spectrum)\n");
+
+    class_call_except(primordial_analytic_spectrum_init(ppt,
+                                                        ppm),
+                      ppm->error_message,
+                      ppm->error_message,
+                      primordial_free(ppm));
+
+    for (index_k = 0; index_k < ppm->lnk_size; index_k++) {
+
+      k=exp(ppm->lnk[index_k]);
+
+      for (index_md = 0; index_md < ppt->md_size; index_md++) {
+        for (index_ic1 = 0; index_ic1 < ppm->ic_size[index_md]; index_ic1++) {
+          for (index_ic2 = index_ic1; index_ic2 < ppm->ic_size[index_md]; index_ic2++) {
+
+            index_ic1_ic2 = index_symmetric_matrix(index_ic1,index_ic2,ppm->ic_size[index_md]);
+
+            if (ppm->is_non_zero[index_md][index_ic1_ic2] == _TRUE_) {
+
+              class_call(primordial_linear_spectrum(ppm,
+                                                      index_md,
+                                                      index_ic1_ic2,
+                                                      exp(ppm->lnk[0]),
+                                                      exp(ppm->lnk[ppm->lnk_size-1]),
+                                                      k,
+                                                      &pk),
+                         ppm->error_message,
+                         ppm->error_message);
+
+              if (index_ic1 == index_ic2) {
+
+                /* diagonal coefficients: ln[P(k)] */
+
+                ppm->lnpk[index_md][index_k*ppm->ic_ic_size[index_md]+index_ic1_ic2] = log(pk);
+              }
+              else {
+
+                /* non-diagonal coefficients: cosDelta(k) = P(k)_12/sqrt[P(k)_1 P(k)_2] */
+
+                class_call(primordial_linear_spectrum(ppm,
+                                                        index_md,
+                                                        index_symmetric_matrix(index_ic1,index_ic1,ppm->ic_size[index_md]),
+                                                        exp(ppm->lnk[0]),
+                                                        exp(ppm->lnk[ppm->lnk_size-1]),
+                                                        k,
+                                                        &pk1),
+                           ppm->error_message,
+                           ppm->error_message);
+
+                class_call(primordial_linear_spectrum(ppm,
                                                         index_md,
                                                         index_symmetric_matrix(index_ic2,index_ic2,ppm->ic_size[index_md]),
                                                         exp(ppm->lnk[0]),
